@@ -16,8 +16,18 @@
               <group colspan="4" col="4">
                 <field name="location" placeholder="e.g. http://localhost:8081/redmine"
                     colspan="4" />
-                <field name="key" colspan="4" />
-                <field name="contract_ref" cospan="4" />
+                <field name="key" colspan="2" />
+                <button name="check_auth" 
+                        type="object"
+                        class="oe_highlight"
+                        string="Test Authentication"
+                        colspan="2" />
+                <field name="contract_ref" cospan="2" />
+                <button name="check_contract_ref" 
+                        type="object"
+                        class="oe_highlight"
+                        string="Test Contract # field name"
+                        colspan="2" />
               </group>
             </group>
           </sheet>

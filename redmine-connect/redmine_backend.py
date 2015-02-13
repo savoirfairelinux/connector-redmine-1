@@ -43,7 +43,7 @@ class redmine_backend(orm.Model):
             required=True,
         ),
         'contract_ref': fields.char(
-            'Contract #',
+            'Contract # field name',
             size=64,
         ),
     }
@@ -51,11 +51,11 @@ class redmine_backend(orm.Model):
     _sql_constraints = [(
         'redmine_backend_contract_unique',
         'unique(contract_ref)',
-        _('Contract # must be unique')
+        _('Contract # field name must be unique')
     )]
 
     def _auth(self, cr, uid, ids, context=None):
-        """ Test connection with Redmine """
+        """ Authenticate with Redmine """
         if context is None:
             context = self.pool['res.users'].context_get(cr, uid)
         # Get the location, user and password or key for Redmine
@@ -74,14 +74,13 @@ class redmine_backend(orm.Model):
         )[0]
         location = res['location']
         key = res['key']
-        # version = res['version']
-        # impersonate = res['impersonate']
 
         try:
-            client = Redmine(
+            redmine = Redmine(
                 location,
                 key=key,
             )
+            redmine.auth()
         except exceptions.AuthError:
             raise orm.except_orm(_('Redmine connection Error!'),
                                  _('Invalid authentications key.'))
@@ -92,4 +91,47 @@ class redmine_backend(orm.Model):
             raise orm.except_orm(_('Redmine connection Error!'),
                                  _('Redmine returned an unknown error.'))
 
-        return client
+        return redmine
+
+    def check_auth(self, cr, uid, ids, context=None):
+        """ Check the authentication with Redmine """
+        if context is None:
+            context = self.pool['res.users'].context_get(cr, uid)
+        self._auth(cr, uid, ids, context=context)
+        raise orm.except_orm(_('Connection test succeeded!'),
+                             _('Everything seems properly set up!'))
+
+    def check_contract_ref(self, cr, uid, ids, context=None):
+        """ Check if the contract_ref field exist exist in redmine """
+        if context is None:
+            context = self.pool['res.users'].context_get(cr, uid)
+        redmine = self._auth(cr, uid, ids, context=context)
+        res = self.read(
+            cr, uid, ids, [
+                'contract_ref',
+            ], context=context
+        )[0]
+        contract_ref = res['contract_ref']
+
+        try:
+            projects = redmine.project.all()
+            exist = False
+            for cs in projects[0].custom_fields:
+                if cs.__getattr__('name') == contract_ref:
+                    exist = True
+
+            if exist is True:
+                raise orm.except_orm(_('Connection test succeeded!'),
+                                     _('Everything seems properly set up!'))
+            else:
+                raise orm.except_orm(
+                    _('Redmine backend configuration error!'),
+                    _("The contract # field name doesn't exist.")
+                )
+
+        except exceptions.ResourceError:
+            raise orm.except_orm(_('Redmine connection Error!'),
+                                 _('Unsupported Redmine resource exception.'))
+        except exceptions.ResourceNotFoundError:
+            raise orm.except_orm(_('Redmine connection Error!'),
+                                 _("Requested resource doesn't exist."))

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    
+    <record id="view_redmine_backend_form" model="ir.ui.view">
+        <field name="name">redmine.backend.form</field>
+        <field name="model">redmine.backend</field>
+        <field name="inherit_id" ref="redmine_connect.view_redmine_backend_form"/>
+        <field name="arch" type="xml">
+            <button name="check_auth" position="after">
+                <field name="contract_ref" cospan="2"/>
+                <button name="check_contract_ref" 
+                    type="object"
+                    class="oe_highlight"
+                    string="Test Contract # field name"
+                    colspan="2"/>
+            </button>
+        </field>
+    </record>
+
+    <record id="view_redmine_backend_tree" model="ir.ui.view">
+    <field name="name">redmine.backend.tree</field>
+    <field name="model">redmine.backend</field>
+    <field name="inherit_id" ref="redmine_connect.view_redmine_backend_tree"/>
+    <field name="arch" type="xml">
+        <field name="location" position="after">
+            <field name="contract_ref" />
+        </field>
+    </field>
+    </record>
+
+  </data>
+</openerp>

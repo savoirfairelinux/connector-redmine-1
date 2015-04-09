@@ -22,12 +22,7 @@
                         class="oe_highlight"
                         string="Test Authentication"
                         colspan="2" />
-                <field name="contract_ref" cospan="2" />
-                <button name="check_contract_ref" 
-                        type="object"
-                        class="oe_highlight"
-                        string="Test Contract # field name"
-                        colspan="2" />
+                <field name="version"/>
               </group>
             </group>
           </sheet>
@@ -43,7 +38,6 @@
           <field name="name" />
           <field name="key" />
           <field name="location" />
-          <field name="contract_ref" />
         </tree>
       </field>
     </record>

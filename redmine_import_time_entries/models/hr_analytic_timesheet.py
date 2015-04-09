@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    This module copyright (C) 2010 - Present Savoir-faire Linux
+#    This module copyright (C) 2015 - Present Savoir-faire Linux
 #    (<http://www.savoirfairelinux.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -20,24 +20,14 @@
 #
 ##############################################################################
 
-{
-    'name': 'Redmine Connector',
-    'version': '0.1',
-    'author': 'Savoir-faire Linux',
-    'maintainer': 'Savoir-faire Linux',
-    'website': 'http://www.savoirfairelinux.com',
-    'category': 'Connector',
-    'depends': [
-        'connector',
-    ],
-    'external_dependencies': {
-        'python': ['redmine'],
-    },
-    'data': [
-        'redmine_backend_view.xml',
-        'redmine_menu.xml',
-    ],
-    'application': True,
-    'installable': True,
-    'active': False,
-}
+from openerp.osv import orm, fields
+
+
+class hr_analytic_timesheet(orm.Model):
+    _inherit = 'hr.analytic.timesheet'
+
+    _columns = {
+        'imported_from_redmine': fields.boolean(
+            'Imported From Redmine', readonly=True,
+        ),
+    }

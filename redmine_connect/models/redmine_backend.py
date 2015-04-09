@@ -31,6 +31,9 @@ class redmine_backend(orm.Model):
     _inherit = 'connector.backend'
     _backend_type = 'redmine'
 
+    def _select_versions(self, cr, uid, context=None):
+        return [('1.3', _('1.3 and higher'))]
+
     _columns = {
         'location': fields.char(
             'Location',
@@ -42,17 +45,12 @@ class redmine_backend(orm.Model):
             size=64,
             required=True,
         ),
-        'contract_ref': fields.char(
-            'Contract # field name',
-            size=64,
+        'version': fields.selection(
+            _select_versions,
+            string='Version',
+            required=True
         ),
     }
-
-    _sql_constraints = [(
-        'redmine_backend_contract_unique',
-        'unique(contract_ref)',
-        _('Contract # field name must be unique')
-    )]
 
     def _auth(self, cr, uid, ids, context=None):
         """ Authenticate with Redmine """
@@ -101,37 +99,20 @@ class redmine_backend(orm.Model):
         raise orm.except_orm(_('Connection test succeeded!'),
                              _('Everything seems properly set up!'))
 
-    def check_contract_ref(self, cr, uid, ids, context=None):
-        """ Check if the contract_ref field exist exist in redmine """
-        if context is None:
-            context = self.pool['res.users'].context_get(cr, uid)
-        redmine = self._auth(cr, uid, ids, context=context)
-        res = self.read(
-            cr, uid, ids, [
-                'contract_ref',
-            ], context=context
-        )[0]
-        contract_ref = res['contract_ref']
+    def getUser(self, cr, uid, ids, login, redmine=False, context=None):
+        """
+        Get a redmine user from a given odoo user login
+        """
+        if not redmine:
+            redmine = self._auth(cr, uid, ids, context=context)
 
-        try:
-            projects = redmine.project.all()
-            exist = False
-            for cs in projects[0].custom_fields:
-                if cs.__getattr__('name') == contract_ref:
-                    exist = True
+        users = redmine.user.filter(name=login)
+        user = next((user for user in users if user.login == login), False)
 
-            if exist is True:
-                raise orm.except_orm(_('Connection test succeeded!'),
-                                     _('Everything seems properly set up!'))
-            else:
-                raise orm.except_orm(
-                    _('Redmine backend configuration error!'),
-                    _("The contract # field name doesn't exist.")
-                )
+        if not user:
+            raise orm.except_orm(
+                _('Error'),
+                _('No user found in the Redmine database with '
+                    'the following login: %s') % login)
 
-        except exceptions.ResourceError:
-            raise orm.except_orm(_('Redmine connection Error!'),
-                                 _('Unsupported Redmine resource exception.'))
-        except exceptions.ResourceNotFoundError:
-            raise orm.except_orm(_('Redmine connection Error!'),
-                                 _("Requested resource doesn't exist."))
+        return user

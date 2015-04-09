@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    This module copyright (C) 2015 - Present Savoir-faire Linux
+#    This module copyright (C) 2010 - Present Savoir-faire Linux
 #    (<http://www.savoirfairelinux.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -20,8 +20,30 @@
 #
 ##############################################################################
 
-from . import (
-    redmine_backend,
-    backend,
-)
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+{
+    'name': 'Redmine Connector',
+    'version': '0.1',
+    'author': 'Savoir-faire Linux',
+    'maintainer': 'Savoir-faire Linux',
+    'website': 'http://www.savoirfairelinux.com',
+    'category': 'Connector',
+    'description': """
+Redmine Connector
+=================
+Add the Redmine Backend
+""",
+    'depends': [
+        'connector',
+    ],
+    'external_dependencies': {
+        'python': ['redmine'],
+    },
+    'data': [
+        'security/ir.model.access.csv',
+        'views/redmine_backend_view.xml',
+        'views/redmine_menu.xml',
+    ],
+    'application': True,
+    'installable': True,
+    'active': False,
+}
